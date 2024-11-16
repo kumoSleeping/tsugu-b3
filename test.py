@@ -1,15 +1,10 @@
-import tsugu_api
-from tsugu import cmd_generator
-import os
-from PIL import Image
 import io
-
-from tsugu_api_core import settings
-
-import asyncio
 import base64
-import io
+import asyncio
 from PIL import Image
+from loguru import logger
+from tsugu import cmd_generator
+
 
 tsugu_test_all = [
     # 'help',
@@ -62,38 +57,37 @@ tsugu_test_all = [
     # '主账号 2',
     # '解除绑定 1',
     # 'ycm',
-    
     # '上传车牌 12345q4',
 ]
 
+
 async def test_tsugu():
-    
+
     async def _log_send(result):
-        from loguru import logger
         if isinstance(result, list):
             if not result:
                 logger.error("没有返回数据")
                 return
             for item in result:
-                if item['type'] == 'string':
-                    logger.success('\n'+f"[文字信息] {item['string']}")
-                elif item['type'] == 'base64':
-                    i = base64.b64decode(item['string'])
-                    logger.warning('\n'+f"[图片信息: 图像大小: {len(i) / 1024:.2f}KB]")
+                if item["type"] == "string":
+                    logger.success("\n" + f"[文字信息] {item['string']}")
+                elif item["type"] == "base64":
+                    i = base64.b64decode(item["string"])
+                    logger.warning(
+                        "\n" + f"[图片信息: 图像大小: {len(i) / 1024:.2f}KB]"
+                    )
                     img = Image.open(io.BytesIO(i))
                     img.show()
         if isinstance(result, str):
-            logger.success('\n'+result)
+            logger.success("\n" + result)
 
     test_count = 0
-    user_id='114514'
+    user_id = "114514"
 
     for i in tsugu_test_all:
-        msg = await cmd_generator(message=i, user_id=user_id,send_func=_log_send)
-    
+        msg = await cmd_generator(message=i, user_id=user_id, send_func=_log_send)
+
 
 # 启动测试
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(test_tsugu())
-    
-    
