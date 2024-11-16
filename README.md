@@ -117,7 +117,8 @@ asyncio.run(cmd_generator(message='查卡 ksm', user_id='114514', send_func=_tes
 
 ## ✏️ Config
 
-配置方式：
+>配置方式
+
 - 通过环境变量
   linux & macos
   ```zsh
