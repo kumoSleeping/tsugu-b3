@@ -11,7 +11,8 @@ from .config import load_config, apply_config
 from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG
 
 
-apply_config(load_config())
+config = load_config()
+apply_config(config)
 
 output_manager.set_action(lambda *_: None)  # 禁用 alc 自带输出
 
@@ -490,8 +491,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     number=int(car_id),
                     user_id=car_user_id,
                     raw_message=message_for_car,
-                    source="Tsugu",
-                    token="ZtV4EX2K9Onb",
+                    source=config["bandori_station_name"],
+                    token=config["bandori_station_token"],
                 )
                 return
 

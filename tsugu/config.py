@@ -15,6 +15,8 @@ def load_config():
         "userdata_backend_proxy": True,
         "use_easy_bg": True,
         "compress": True,
+        "bandori_station_token": "ZtV4EX2K9Onb",
+        "bandori_station_name": "Tsugu",
     }
 
     for k, v in os.environ.items():
@@ -36,5 +38,3 @@ def apply_config(config: dict):
         k = k.lower().removeprefix("tsugu_")
         if hasattr(settings, k):
             setattr(settings, k, v)
-        else:
-            print(f"Unknown config key: {k}")
