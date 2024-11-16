@@ -52,7 +52,7 @@ alc_gacha_simulate = Alconna(
 
 alc_get_card_illustration = Alconna(
     ["查卡面", "查插画"],
-    Args["cardId", int],
+    Args["cardId?", int],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据卡面ID查询卡面插画",

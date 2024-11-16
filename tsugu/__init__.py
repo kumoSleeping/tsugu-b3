@@ -1,35 +1,17 @@
 import re
 import asyncio
 import tsugu_api_async
-from loguru import logger
-from tsugu_api_core import settings
+
 from typing import Awaitable, List, Union, Dict, Optional
 from arclet.alconna import output_manager, command_manager
 
 from .utils import *
 from .alc_cmd import *
+from .config import load_config, apply_config
 from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG
 
 
-settings.timeout = int(os.getenv("TSUGU_TIMEOUT", "120"))
-settings.proxy = os.getenv("TSUGU_PROXY", "")
-settings.backend_url = os.getenv("TSUGU_BACKEND_URL", "http://tsugubot.com:8080")
-settings.backend_proxy = os.getenv("TSUGU_BACKEND_PROXY", "true").lower() == "true"
-settings.userdata_backend_url = os.getenv(
-    "TSUGU_USERDATA_BACKEND_URL", "http://tsugubot.com:8080"
-)
-settings.serdata_backend_proxy = (
-    os.getenv("TSUGU_USERDATA_BACKEND_PROXY", "true").lower() == "true"
-)
-settings.use_easy_bg = os.getenv("TSUGU_USE_EASY_BG", "true").lower() == "true"
-settings.compress = os.getenv("TSUGU_COMPRESS", "true").lower() == "true"
-
-if settings.backend_url != "http://tsugubot.com:8080":
-    logger.info(f"Backend: {settings.backend_url}")
-if settings.userdata_backend_url != "http://tsugubot.com:8080":
-    logger.info(f"Userdata Backend: {settings.userdata_backend_url}")
-if settings.proxy != "":
-    logger.warning(f"Proxy: {settings.backend_proxy}")
+apply_config(load_config())
 
 output_manager.set_action(lambda *_: None)  # 禁用 alc 自带输出
 
@@ -51,8 +33,8 @@ async def cmd_generator(
     Args:
         message (str): 用户信息
         user_id (str): 用户ID
-        platform (str, optional): 平台，当用户ID为真实QQ号时，平台可以为red. Defaults to "red". 
-        send_func (Optional[Awaitable], optional): 发送消息的函数. Defaults to None. 
+        platform (str, optional): 平台，当用户ID为真实QQ号时，平台可以为red. Defaults to "red".
+        send_func (Optional[Awaitable], optional): 发送消息的函数. Defaults to None.
 
     send_func 需处理的消息格式为 str 或者 List[Dict[str, str]]
 
@@ -93,6 +75,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         )
 
     if (res := alc_get_card_illustration.parse(message)).matched:
+        if res.cardId is None:
+            return command_manager.command_help(res.source.name)
         return await tsugu_api_async.get_card_illustration(card_id=res.cardId)
 
     if (res := alc_cutoff_list_of_recent_event.parse(message)).matched:
