@@ -77,61 +77,94 @@ pip install tsugu
 
 
 ## 📚 Async & Higher-Order Function
-`cmd_generator` 是一个异步方法，用于直接处理用户输入的自然语言并返回查询结果:   
+`cmd_generator` 是一个异步方法，用于直接处理用户输入的自然语言并处理，调用传入的 `send_func` 发送结果
+- `message` (str)：用户输入的自然语言
+- `user_id` (str)：用户的 `channel_id` 或 `user_id`，当 `platform` 为 `red` 、 `chronocat` 、 `onebot` 时，该值一般为用户 QQ 号
+- `platform` (str)：用户的平台（默认值：`red`）
+- `send_func`（Awaitable）：期望一个接受 `result` 参数的异步方法，用于发送结果，具体需要实现的方法请参考下方示例
 
-
-- 测试可用
 
 ```python
--------------
-预发布版暂无示例
--------------
-```
-
-- 生产实操：以 `satori-python` + `chronocat` 为例
-
-```python
+import asyncio
+import base64
+import io
+from PIL import Image
 from tsugu import cmd_generator
+from loguru import logger
 
--------------
-预发布版暂无示例
--------------
+async def _test_send(result):
+    if isinstance(result, list):
+        if not result:
+            logger.error("没有返回数据")
+            return
+        for item in result:
+            if item["type"] == "string":
+                logger.success("\n" + f"[文字信息] {item['string']}")
+            elif item["type"] == "base64":
+                i = base64.b64decode(item["string"])
+                logger.warning(
+                    "\n" + f"[图片信息: 图像大小: {len(i) / 1024:.2f}KB]"
+                )
+                img = Image.open(io.BytesIO(i))
+                img.show()
+    if isinstance(result, str):
+        logger.success("\n" + f"[文字信息] {result}")
+
+
+asyncio.run(cmd_generator(message='查卡 ksm', user_id='114514', send_func=_test_send))
+
 ```
-> 在常用的qqbot中，群号就是 `channel_id`。   
-> 当你使用QQ号作为 `user_id` 时，`platform` 默认 `red`。   
 
+## ✏️ Config
 
-## ✏️ Env
+配置方式：
+- 通过环境变量
+  linux & macos
+  ```zsh
+  export TSUGU_COMPACT=false
+  ...
+  ```
+  windows
+  ```bat
+  set TSUGU_COMPACT=false
+  ...
+  ```
 
-> Chat Tsugu Py 使用读取环境变量的方式改变一些配置
+- 通过 `.env` 文件
+  ```shell
+  TSUGU_COMPACT=false
+  ...
+  ```
+
+> 可配置项
 
 ```zsh
 # 命令头后是否必须跟上完整的空格才能匹配，例如 `查卡947` 与 `查卡 947` 。（默认值：false）
-export TSUGU_COMPACT='false' 
+TSUGU_COMPACT=false 
 
 # 设置请求超时时间（默认值：120秒）
-export TSUGU_TIMEOUT=120
+TSUGU_TIMEOUT=120
 
 # 设置代理地址（默认值：空字符串）
-export TSUGU_PROXY=''
+TSUGU_PROXY=''
 
 # 设置后端地址（默认值：http://tsugubot.com:8080）
-export TSUGU_BACKEND_URL='http://tsugubot.com:8080'
+TSUGU_BACKEND_URL=http://tsugubot.com:8080
 
 # 设置是否使用后端代理（默认值：true）
-export TSUGU_BACKEND_PROXY='true'
+TSUGU_BACKEND_PROXY=true
 
 # 设置用户数据后端地址（默认值：http://tsugubot.com:8080）
-export TSUGU_USERDATA_BACKEND_URL='http://tsugubot.com:8080'
+TSUGU_USERDATA_BACKEND_URL=http://tsugubot.com:8080
 
 # 设置是否使用用户数据后端代理（默认值：true）
-export TSUGU_USERDATA_BACKEND_PROXY='true'
+TSUGU_USERDATA_BACKEND_PROXY=true
 
 # 设置是否使用简易背景（默认值：true）
-export TSUGU_USE_EASY_BG='true'
+TSUGU_USE_EASY_BG=true
 
 # 设置是否压缩返回数据（默认值：true）
-export TSUGU_COMPRESS='true'
+TSUGU_COMPRESS=true
 ```
 
 

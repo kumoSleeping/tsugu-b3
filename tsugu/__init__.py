@@ -76,6 +76,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         )
 
     if (res := alc_get_card_illustration.parse(message)).matched:
+        # 如果没有卡面ID，则返回帮助信息，因为可能会出现“查卡面”触发后面的查卡的问题
         if res.cardId is None:
             return command_manager.command_help(res.source.name)
         return await tsugu_api_async.get_card_illustration(card_id=res.cardId)
@@ -506,11 +507,4 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         if (res := command.parse(message)).head_matched and not command.parse(
             message
         ).matched:
-            # 帮助信息
-            if res.error_data == ["-h"]:
-                await send_func(command_manager.command_help(res.source.name))
-            # 错误信息
-            else:
-                await send_func(
-                    f"{str(res.error_info)}\n{command_manager.command_help(res.source.name)}"
-                )
+            await send_func(command_manager.command_help(res.source.name))
