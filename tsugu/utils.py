@@ -48,13 +48,6 @@ def server_id_2_server_name(index: _ServerId) -> str:
     return INDEX_TO_SERVER[index] if index in INDEX_TO_SERVER else None
 
 
-def server_exists(server_id: _ServerId) -> bool:
-    """
-    判断服务器是否存在
-    """
-    return server_id is not None
-
-
 def get_user_account_list_msg(user) -> str:
     """
     用于获取绑定的账号的列表信息文字
@@ -110,5 +103,4 @@ async def get_user(user_id: str, platform: str) -> User:
             continue
         except Exception as e:
             logger.error(f"Error: {e}")
-            raise e
-            # return '用户数据库连接失败，请联系管理员'
+            

@@ -290,7 +290,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             指定服务器名，返回该服务器的玩家状态(如果存在)（只返回第一个）
             """
             server_id = server_name_2_server_id(res.serverName)
-            if not server_exists(server_id):
+            if server_id is None:
                 return "未找到服务器 " + res.serverName
 
             for i, x in enumerate(user.user_player_list):

@@ -92,23 +92,23 @@ from PIL import Image
 from tsugu import cmd_generator
 from loguru import logger
 
-async def _test_send(result):
-    if isinstance(result, list):
-        if not result:
-            logger.error("没有返回数据")
-            return
-        for item in result:
-            if item["type"] == "string":
-                logger.success("\n" + f"[文字信息] {item['string']}")
-            elif item["type"] == "base64":
-                i = base64.b64decode(item["string"])
-                logger.warning(
-                    "\n" + f"[图片信息: 图像大小: {len(i) / 1024:.2f}KB]"
-                )
-                img = Image.open(io.BytesIO(i))
-                img.show()
-    if isinstance(result, str):
-        logger.success("\n" + f"[文字信息] {result}")
+  async def _test_send(result):
+      if isinstance(result, list):
+          if not result:
+              logger.error("没有返回数据")
+              return
+          for item in result:
+              if item["type"] == "string":
+                  logger.success("\n" + item['string'])
+              elif item["type"] == "base64":
+                  i = base64.b64decode(item["string"])
+                  logger.warning(
+                      "\n" + f"[图片: 图像大小: {len(i) / 1024:.2f}KB]"
+                  )
+                  img = Image.open(io.BytesIO(i))
+                  img.show()
+      if isinstance(result, str):
+          logger.success("\n" + result)
 
 
 asyncio.run(cmd_generator(message='查卡 ksm', user_id='114514', send_func=_test_send))
