@@ -48,7 +48,7 @@ pip install tsugu
 ## 🚗 App
 | 项目 | 说明 |
 | --- | --- |
-| [Tsugu QQ 官方机器人](https://bot.q.qq.com/s/b2vuxpu4g?id=102076262) | 主力项目 |
+| [Tsugu QQ 官方机器人](https://github.com/kumoSleeping/tsugu-qq-open-platform-bot) | 主力项目 |
 | Tomorin 私家机器人 | 私家车，基于标准用户数据库 |
 | [一个 NoneBot 插件](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 无人维护，不如去用[这个](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
 |[lgr-py Tsugu](https://github.com/kumoSleeping/lgr-tsugu-py) | 无人维护，似了 |

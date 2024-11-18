@@ -507,4 +507,4 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         if (res := command.parse(message)).head_matched and not command.parse(
             message
         ).matched:
-            await send_func(command_manager.command_help(res.source.name))
+            return command_manager.command_help(res.source.name)
