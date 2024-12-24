@@ -502,9 +502,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             return command_manager.all_command_help()
         message = res.cmd + " -h"
 
-    # 最后再次全匹配一次所有命令的 help 信息
+    # 最后处理没有匹配的命令给出帮助信息
     for command in command_manager.get_commands():
-        if (res := command.parse(message)).head_matched and not command.parse(
-            message
-        ).matched:
+        # 如果命令头匹配了，但是命令没有匹配，返回 help 信息
+        if (res := command.parse(message)).head_matched and not command.parse(message).matched:
             return command_manager.command_help(res.source.name)
