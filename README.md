@@ -49,14 +49,14 @@ pip install tsugu
 | 项目 | 说明 |
 | --- | --- |
 | [Tsugu QQ 官方机器人](https://github.com/kumoSleeping/tsugu-qq-open-platform-bot) | 主力项目 |
-| Tomorin 私家机器人 | 私家车，基于标准用户数据库 |
-| [一个 NoneBot 插件](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 无人维护，不如去用[这个](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
-|[lgr-py Tsugu](https://github.com/kumoSleeping/lgr-tsugu-py) | 无人维护，似了 |
+| [TBBP](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 无人维护 NoneBot 用户请使用 [NPTBB](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
+|[LTP](https://github.com/kumoSleeping/lgr-tsugu-py) | 无人维护 无法使用 |
 
 
 ## 📜 Feat
 
 - 为改善用户体验，本包与 `koishi 插件` 在部分行为上略有不同。
+  - 更加详细的帮助信息。
   - 默认不需要命令头后跟上完整的空格（可关闭）。
   - `绑定玩家` `解除绑定` `刷新验证吗` 等自验证策略。
   - 基于 `Alconna` 的真 “可选参数” 。
@@ -86,32 +86,15 @@ pip install tsugu
 
 ```python
 import asyncio
-import base64
-import io
-from PIL import Image
 from tsugu import cmd_generator
 from loguru import logger
 
-  async def _test_send(result):
-      if isinstance(result, list):
-          if not result:
-              logger.error("没有返回数据")
-              return
-          for item in result:
-              if item["type"] == "string":
-                  logger.success("\n" + item['string'])
-              elif item["type"] == "base64":
-                  i = base64.b64decode(item["string"])
-                  logger.warning(
-                      "\n" + f"[图片: 图像大小: {len(i) / 1024:.2f}KB]"
-                  )
-                  img = Image.open(io.BytesIO(i))
-                  img.show()
-      if isinstance(result, str):
-          logger.success("\n" + result)
+async def _test_send_eg(result):
+    if isinstance(result, list): [logger.success(item['string']) for item in result if item["type"] == "string"]
+    if isinstance(result, str): logger.success("\n" + result)
 
+asyncio.run(cmd_generator(message='查卡 -h', user_id='114514', platform='satori',send_func=_test_send_eg))
 
-asyncio.run(cmd_generator(message='查卡 ksm', user_id='114514', send_func=_test_send))
 
 ```
 
@@ -168,5 +151,14 @@ TSUGU_USE_EASY_BG=true
 TSUGU_COMPRESS=true
 ```
 
+
+
+## 🔧 开发相关
+
+> 安装依赖
+> 
+```shell
+pip install -r req
+```
 
 ---

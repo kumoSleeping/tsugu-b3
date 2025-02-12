@@ -22,9 +22,10 @@ async def async_print(*args, **kwargs):  # 默认 send 输出函数
 
 
 async def cmd_generator(
+    *,
     message: str,
     user_id: str,
-    platform: str = "red",
+    platform: str = "chronocat",
     send_func: Optional[Awaitable] = async_print,
 ):
     """
@@ -34,7 +35,7 @@ async def cmd_generator(
     Args:
         message (str): 用户信息
         user_id (str): 用户ID
-        platform (str, optional): 平台，当用户ID为真实QQ号时，平台可以为red. Defaults to "red".
+        platform (str, optional): 平台, 当用户ID为真实QQ号时, 平台可以为 chronocat == red == onebot. Defaults to "chronocat".
         send_func (Optional[Awaitable], optional): 发送消息的函数. Defaults to None.
 
     send_func 需处理的消息格式为 str 或者 List[Dict[str, str]]
@@ -51,7 +52,7 @@ async def cmd_generator(
             # 使得 _handler 函数直接 return 与 send 都可以发送消息
             await send_func(result)
     except Exception as e:
-        await send_func("出现错误，请联系管理员")
+        await send_func("出现错误, 请联系管理员")
         raise e
 
 
@@ -63,7 +64,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     if (res := alc_song_meta.parse(message)).matched:
         user = await get_user(user_id, platform)
         meta = True if res.meta else False
-        # 使用 return 直接返回同样可以发送消息，次写法等同于 return await _send( await tsugu_api_async... )
+        # 使用 return 直接返回同样可以发送消息, 次写法等同于 return await _send( await tsugu_api_async... )
         return await tsugu_api_async.event_stage(
             main_server=user.main_server, event_id=res.eventId, meta=meta
         )
@@ -76,7 +77,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         )
 
     if (res := alc_get_card_illustration.parse(message)).matched:
-        # 如果没有卡面ID，则返回帮助信息，因为可能会出现“查卡面”触发后面的查卡的问题
+        # 如果没有卡面ID, 则返回帮助信息, 因为可能会出现“查卡面”触发后面的查卡的问题
         if res.cardId is None:
             return command_manager.command_help(res.source.name)
         return await tsugu_api_async.get_card_illustration(card_id=res.cardId)
@@ -188,7 +189,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             r = await tsugu_api_async.bind_player_request(
                 user_id=user_id, platform=platform
             )
-            return f"绑定玩家 0 用于刷新验证码\n刷新成功，验证码为 {r.get('data')['verifyCode']} "
+            return f"绑定玩家 0 用于刷新验证码\n刷新成功, 验证码为 {r.get('data')['verifyCode']} "
 
         user = await get_user(user_id, platform)
         server = (
@@ -206,9 +207,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         r = await tsugu_api_async.bind_player_request(
             user_id=user_id, platform=platform
         )
-        await _send(
-            f"""已进入绑定流程，请将在2min内将游戏账号的 评论(个性签名) 或者 当前使用的 乐队编队名称改为\n{r.get('data')['verifyCode']}\nbot将自动验证，绑定成功后会发送消息通知\n若验证码不可用，使用「绑定玩家 0」刷新验证码"""
-        )
+        await _send(f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知""")
 
         for i in range(7):
             await asyncio.sleep(20)
@@ -220,15 +219,17 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     player_id=res.playerId,
                     binding_action="bind",
                 )
-                return f"绑定成功，现在可以使用 玩家状态 命令查看绑定的玩家状态"
+                user_new = await get_user(user_id, platform)
+                bind_record = get_user_account_list_msg(user=user_new)
+                return f"""绑定成功, 现在可以使用 "玩家状态" 命令查看绑定的玩家状态\n绑定列表: {bind_record}"""
             except Exception as e:
                 # 如果最后一次
                 if i == 6:
-                    return f"解除绑定超时，{e}\n用户未及时修改游戏信息或Bestdori服务器暂时失效"
+                    return f"解除绑定超时, {e}\n用户未及时修改游戏信息或Bestdori服务器暂时失效"
                 if "都与验证码不匹配" in str(e):
                     continue
                 # 其他错误
-                return f"绑定失败，{e}"
+                return f"绑定失败, {e}"
 
     if (res := alc_change_displayed_server_list.parse(message)).matched:
         user = await get_user(user_id, platform)
@@ -267,18 +268,18 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         async def _player_status_case_default():
             """
-            默认情况下，返回主账号的玩家状态
+            默认情况下, 返回主账号的玩家状态
             """
             user_player_index = user.user_player_index
             if len(user.user_player_list) == 0:
-                return "未找到记录，请先绑定"
+                return "未找到记录, 请先绑定"
 
             if user.user_player_index + 1 > len(user.user_player_list):
                 update = {"userPlayerIndex": 0}
                 await tsugu_api_async.change_user_data(
                     platform=platform, user_id=user.user_id, update=update
                 )
-                await _send(f"""主账号异常，自动修正成功，将生成玩家状态（1）""")
+                await _send(f"""主账号异常, 自动修正成功, 将生成玩家状态（1）""")
             game_id_msg = user.user_player_list[user_player_index]
             return await tsugu_api_async.search_player(
                 player_id=int(game_id_msg.get("playerId")),
@@ -287,7 +288,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         async def _player_status_case_server():
             """
-            指定服务器名，返回该服务器的玩家状态(如果存在)（只返回第一个）
+            指定服务器名, 返回该服务器的玩家状态(如果存在)（只返回第一个）
             """
             server_id = server_name_2_server_id(res.serverName)
             if server_id is None:
@@ -304,10 +305,10 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         async def _player_status_case_index():
             """
-            指定账号序号，返回该账号的玩家状态
+            指定账号序号, 返回该账号的玩家状态
             """
             if res.accountIndex > len(user.user_player_list) or res.accountIndex < 1:
-                return f"未找到记录 {res.accountIndex}，请先绑定"
+                return f"未找到记录 {res.accountIndex}, 请先绑定"
 
             game_id_msg = user.user_player_list[res.accountIndex - 1]
             return await tsugu_api_async.search_player(
@@ -335,8 +336,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         ):
             bind_record = get_user_account_list_msg(user=user)
             if bind_record == "":
-                return "未找到记录，请先绑定账号"
-            return f"请选择你要设置为主账号的账号数字：\n{bind_record}\n例如：主账号 1"
+                return "未找到记录, 请先绑定账号"
+            return f"请选择你要设置为主账号的账号数字: \n{bind_record}\n例如: 主账号 1"
 
         update = {"userPlayerIndex": res.accountIndex - 1}
         await tsugu_api_async.change_user_data(platform, user.user_id, update)
@@ -349,7 +350,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 user_id=user_id, platform=platform
             )
             return (
-                f"解除绑定 0 用于刷新验证码\n刷新成功，验证码为 {r.get('data')['verifyCode']} "
+                f"解除绑定 0 用于刷新验证码\n刷新成功, 验证码为 {r.get('data')['verifyCode']} "
                 ""
             )
 
@@ -358,8 +359,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         if (not res.index) or len(user.user_player_list) < res.index or res.index < 1:
             bind_record = get_user_account_list_msg(user=user)
             if bind_record == "":
-                return "未找到记录，请先绑定账号"
-            return f"选择你要解除的账号数字：\n{bind_record}\n例如：解除绑定 1"
+                return "未找到记录, 请先绑定账号"
+            return f"选择你要解除的账号数字: \n{bind_record}\n例如: 解除绑定 1"
 
         r = await tsugu_api_async.bind_player_request(
             user_id=user_id, platform=platform
@@ -378,7 +379,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         # 常规解绑流程
         await _send(
-            f"""已进入解除绑定流程，请将在2min内将游戏账号的 评论(个性签名) 或者 当前使用的 乐队编队名称改为\n{r.get('data')['verifyCode']}\nbot将自动验证，解除成功后会发送消息通知\n若验证码不可用，使用「解除绑定 0」刷新验证码"""
+            f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知"""
         )
         for i in range(7):
             await asyncio.sleep(20)
@@ -393,10 +394,10 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 return f"解除绑定成功"
             except Exception as e:
                 if i == 6:
-                    return f"解除绑定超时，{e}\n用户未及时修改游戏信息或Bestdori服务器暂时失效"
+                    return f"解除绑定超时, 用户未及时修改游戏信息或Bestdori服务器暂时失效"
                 if "都与验证码不匹配" in str(e):
                     continue
-                return f"解除绑定失败，{e}"
+                return f"解除绑定失败, {e}, 请联系管理员"
 
     if (res := alc_query_room_number.parse(message)).matched:
 
@@ -419,7 +420,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 continue
 
             new_data = {}
-            # 添加 number 到 seen_numbers，以便后续检查
+            # 添加 number 到 seen_numbers, 以便后续检查
             seen_numbers.add(number)
 
             # 检查是否有足够的玩家信息
@@ -479,14 +480,14 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     # 关闭车牌转发
                     return
 
-                # 先假设 car_id 为 6 位数字，如果不是则取前 5 位
+                # 先假设 car_id 为 6 位数字, 如果不是则取前 5 位
                 car_id = (
                     car_id[:5]
                     if not (car_id := message_for_car[:6]).isdigit()
                     and car_id[:5].isdigit()
                     else car_id
                 )
-                # 如果 user_id 不是数字，则设置为默认值（TSUGU 官方 QQ 号）
+                # 如果 user_id 不是数字, 则设置为默认值（TSUGU 官方 QQ 号）
                 car_user_id = user.user_id if user.user_id.isdigit() else "3889000770"
                 await tsugu_api_async.submit_room_number(
                     number=int(car_id),
@@ -504,6 +505,11 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
     # 最后处理没有匹配的命令给出帮助信息
     for command in command_manager.get_commands():
-        # 如果命令头匹配了，但是命令没有匹配，返回 help 信息
-        if (res := command.parse(message)).head_matched and not command.parse(message).matched:
-            return command_manager.command_help(res.source.name)
+        if (res := command.parse(message)).head_matched and not command.parse(
+            message
+        ).matched:
+            if message.endswith(" -h"):
+                return command_manager.command_help(res.source.name).replace("\n使用示例:\n", "", 1).strip()
+            # 如果命令头匹配了, 但是命令没有匹配, 返回 help 信息
+            foo: str = command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
+            return f"Error: 参数错误, 请正确输入参数:\n{foo}"

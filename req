@@ -1,0 +1,4 @@
+python-dotenv
+loguru
+tsugu-api-python>=1.4.2
+arclet-alconna<2.0.0a1

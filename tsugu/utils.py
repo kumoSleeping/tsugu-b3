@@ -1,11 +1,11 @@
 import asyncio
+from typing_extensions import Optional
 import tsugu_api_async
 from typing import List
 from loguru import logger
 from dataclasses import dataclass
 from tsugu_api_core._typing import _ServerId, _UserPlayerInList
 
-from .alc_cmd import *
 from .const import SERVER_TO_INDEX, INDEX_TO_SERVER
 
 
@@ -24,14 +24,14 @@ def server_names_2_server_ids(server_name: List[str]) -> List[_ServerId]:
     """
     服务器名(多)转服务器ID(多)
     """
-    return [SERVER_TO_INDEX[code] for code in server_name]
+    return [SERVER_TO_INDEX[code] for code in server_name] #type: ignore
 
 
 def server_name_2_server_id(server_name: str) -> _ServerId:
     """
     服务器名(1)转服务器ID(1)
     """
-    return SERVER_TO_INDEX[server_name] if server_name in SERVER_TO_INDEX else None
+    return SERVER_TO_INDEX[server_name] if server_name in SERVER_TO_INDEX else None #type: ignore
 
 
 def server_ids_2_server_names(index: List[_ServerId]) -> List[str]:
@@ -45,7 +45,7 @@ def server_id_2_server_name(index: _ServerId) -> str:
     """
     服务器ID(1)转服务器名(1)
     """
-    return INDEX_TO_SERVER[index] if index in INDEX_TO_SERVER else None
+    return INDEX_TO_SERVER[index] if index in INDEX_TO_SERVER else None #type: ignore
 
 
 def get_user_account_list_msg(user) -> str:
@@ -76,7 +76,7 @@ def get_user_account_list_msg(user) -> str:
     return bind_record
 
 
-async def get_user(user_id: str, platform: str) -> User:
+async def get_user(user_id: str, platform: str) -> Optional[User]:
     """
     多次尝试获取用户数据
 
@@ -97,10 +97,11 @@ async def get_user(user_id: str, platform: str) -> User:
                 user_player_index=user_data.get("userPlayerIndex"),
                 user_player_list=user_data.get("userPlayerList"),
             )
+            logger.info(f"用户数据: {user}")
             return user
         except TimeoutError:
             await asyncio.sleep(0.2)
             continue
         except Exception as e:
             logger.error(f"Error: {e}")
-            
+            raise e
