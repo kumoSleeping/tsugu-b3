@@ -615,7 +615,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             return '\n'.join(command_manager.all_command_help().split("\n")[:-1]) + """\n使用 "help 命令名" 查看命令帮助"""
         else:
             # 对应下方的最后处理没有匹配的命令给出帮助信息
-            message = f"{res.cmd} -h" # 模拟用户输入help命令
+            message = f"{res.cmd[0]} -h" # 模拟用户输入help命令
             logger.warning(f"已更改用户输入: {message}")
 
 
@@ -625,5 +625,6 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             if message.endswith(" -h"):
                 return command_manager.command_help(res.source.name).replace("\n使用示例:\n", "", 1).strip()
             # 如果命令头匹配了, 但是命令没有匹配, 返回 help 信息
+            print(command_manager.command_help(res.source.name))
             foo: str = command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
             return f"{foo} \n"

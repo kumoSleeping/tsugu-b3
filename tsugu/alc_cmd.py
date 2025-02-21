@@ -19,7 +19,7 @@ if not TSUGU_COMPACT:
 
 alc_help = Alconna(
     ["help"],
-    Args["cmd;?", str],
+    Args["cmd;?", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="",
@@ -485,7 +485,7 @@ alc_account_main = Alconna(
     Args["accountIndex;?", int],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
-        description="设定默认玩家状态、车牌展示中的主账号使用第几个账号",
+        description="设定玩家状态、车牌展示中的主账号",
 #         example="""主账号 : 返回所有账号列表
 # 主账号 2 : 将第二个账号设置为主账号""",
         example="""
