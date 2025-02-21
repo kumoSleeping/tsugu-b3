@@ -26,9 +26,8 @@ alc_help = Alconna(
     ),
 )
 
-
-alc_event_stage = Alconna(
-    ["查试炼"],
+alc_5v5 = Alconna(
+    ["5v5", "查试炼"],
     Args["eventId;?", [int]]["meta;?", ["-m"]],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -45,9 +44,8 @@ alc_event_stage = Alconna(
     ),
 )
 
-
-alc_gacha_simulate = Alconna(
-    ["抽卡模拟", "卡池模拟"],
+alc_pull = Alconna(
+    ["pull", "抽卡模拟", "卡池模拟"],
     Args["times", int, 10]["gacha_id;?", int],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -67,77 +65,12 @@ alc_gacha_simulate = Alconna(
     ),
 )
 
-alc_get_card_illustration = Alconna(
-    ["查卡面", "查插画"],
-    Args["cardId?", int],
-    meta=CommandMeta(
-        compact=TSUGU_COMPACT,
-        description="查询卡面插画",
-        example='''
-必选参数:
-    卡面ID(数字) : 用于指定卡面ID
-使用例:
-    查卡面 1399
-关联指令:
-    查卡 : 使用"查卡"命令获取卡面ID
-'''
-    ),
-)
-
-alc_cutoff_list_of_recent_event = Alconna(
-    ["lsycx", "历史预测线"],
-    Args["tier", int]["eventId;?", int][
-        "serverName;?",
-        ServerNameFull,
-    ],
-    meta=CommandMeta(
-        compact=TSUGU_COMPACT,
-        description="历史同类活动档线数据",
-        # example="lsycx 1000\nlsycx 1000 177 jp",
-        example='''
-功能介绍:
-    查询 指定档位的预测线 与 [(最近的4期)(活动类型相同的)活动的]档线数据
-必选参数:
-    "20“ / "30" / "50" ...(档位数字) : 用于指定档位
-可选参数:
-    活动ID(数字) : 用于指定活动ID, 默认为当前活动
-    "cn" / "jp" / "en" / "tw" : 用于指定服务器, 默认为你的默认服务器
-使用例:
-    lsycx 1000
-    lsycx 1000 177 : 1000是档位, 177是活动ID
-    lsycx 1000 jp
-    lsycx 1000 177 jp
-特别提醒:
-    由于 bestdori 限制, 本功能暂不支持 10 档位的历史数据
-'''
-    ),
-)
-
-alc_search_gacha = Alconna(
-    ["查卡池"],
-    Args["gachaId", int],
-    meta=CommandMeta(
-        compact=TSUGU_COMPACT,
-        description="查询卡池信息",
-        example='''
-必选参数:
-    "1~∞"(数字) : 用于指定卡池ID
-使用例:
-    查卡池 947
-关联指令:
-    查卡 : 使用"查卡"命令获取卡池ID
-    查活动 : 使用"查活动"命令获取卡池ID
-'''
-    ),
-)
-
-alc_search_character = Alconna(
-    ["查角色"],
+alc_char = Alconna(
+    ["char", "查角色"],
     Args["word", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据角色名、乐队、昵称等查询角色信息",
-        # example="查角色 10 :返回10号角色的信息\n查角色 吉他 :返回所有角色模糊搜索标签中包含吉他的角色列表",
         example='''
 使用ID查询时:
     必选参数:
@@ -156,8 +89,8 @@ alc_search_character = Alconna(
     ),
 )
 
-alc_search_event = Alconna(
-    ["查活动"],
+alc_event = Alconna(
+    ["event", "查活动"],
     Args["word", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -172,16 +105,54 @@ alc_search_event = Alconna(
         乐队 : 用于模糊搜索乐队, 例如"popipa", "ras", "其他"
         角色 : 用于指定活动加成角色, 例如"羽泽鸫", "ksm"
         属性 : 用于指定属性, 例如"pure", "蓝"
+        区间选择:
+            "-" : 用于指定活动区间, 例如"180-200"
+            ">" / "<" : 用于指定活动ID大于或小于, 例如">100", "<200"
 使用例:
     查活动 177
     查活动 绿 tsugu
-    查活动 绿
+    查活动 橙 ppp >200
 '''
     ),
 )
 
-alc_search_card = Alconna(
-    ["查卡"],
+alc_gacha = Alconna(
+    ["gacha", "查卡池"],
+    Args["gachaId", int],
+    meta=CommandMeta(
+        compact=TSUGU_COMPACT,
+        description="查询卡池信息",
+        example='''
+必选参数:
+    "1~∞"(数字) : 用于指定卡池ID
+使用例:
+    查卡池 947
+关联指令:
+    查卡 : 使用"查卡"命令获取卡池ID
+    查活动 : 使用"查活动"命令获取卡池ID
+'''
+    ),
+)
+
+alc_card_art = Alconna(
+    ["card art", "查卡面", "查插画"],
+    Args["cardId", int],
+    meta=CommandMeta(
+        compact=TSUGU_COMPACT,
+        description="查询卡面插画",
+        example='''
+必选参数:
+    卡面ID(数字) : 用于指定卡面ID
+使用例:
+    查卡面 1399
+关联指令:
+    查卡 : 使用"查卡"命令获取卡面ID
+'''
+    ),
+)
+
+alc_card = Alconna(
+    ["card", "查卡"],
     Args["word", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -215,29 +186,8 @@ alc_search_card = Alconna(
     ),
 )
 
-alc_search_player = Alconna(
-    ["查玩家", "查询玩家"],
-    Args["playerId", int][
-        "serverName;?",
-        ServerNameFull,
-    ],
-    meta=CommandMeta(
-        compact=TSUGU_COMPACT,
-        description="根据玩家ID、服务器查询玩家信息",
-        example="""
-必选参数:
-    玩家ID(数字) : 用于指定玩家ID
-可选参数:
-    "cn" / "jp" / "en" / "tw" : 用于指定服务器, 不指定时为你的默认服务器
-使用例:
-    查玩家 1003282233 : 从你的默认服务器查玩家 1003282233
-    查玩家 40474621 jp 
-""",
-    ),
-)
-
 alc_song_random = Alconna(
-    ["随机曲"],
+    ["song random", "随机曲"],
     Args["word;?", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -260,14 +210,12 @@ alc_song_random = Alconna(
     ),
 )
 
-alc_search_song = Alconna(
-    ["查曲"],
+alc_song = Alconna(
+    ["song", "查曲"],
     Args["word", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据关键词或曲目ID查询曲目信息",
-#         example="""查曲 1 :返回1号曲的信息
-# 查曲 ag lv27 :返回所有难度为27的ag曲列表""",
         example='''
 使用ID查询时:
     必选参数:
@@ -291,8 +239,8 @@ alc_search_song = Alconna(
     ),
 )
 
-alc_song_chart = Alconna(
-    ["查谱面", "查铺面"],
+alc_chart = Alconna(
+    ["chart", "查谱面", "查铺面"],
     Args["songId", int][
         "difficultyText",
         ("easy", "ez", "normal", "nm", "hard", "hd", "expert", "ex", "special", "sp"),
@@ -307,16 +255,16 @@ alc_song_chart = Alconna(
 可选参数:
     "ez" / "easy" / "nm" ... : 用于指定难度, 默认为ex
 使用例:
-    查谱面 1 
-    查谱面 128 special 
+    查谱面 1
+    查谱面 128 special
 关联指令:
     查曲 : 使用"查曲"命令获取曲目ID
 """,
     ),
 )
 
-alc_song_meta = Alconna(
-    ["查询分数表", "查分数表", "查询分数榜", "查分数榜"],
+alc_scores = Alconna(
+    ["scores", "查询分数表", "查分数表", "查询分数榜", "查分数榜"],
     Args["serverName;?", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -326,14 +274,43 @@ alc_song_meta = Alconna(
 可选参数:
     "cn" / "jp" / "en" / "tw" : 用于指定服务器, 默认为你的默认服务器
 使用例:
-    查询分数表 
+    查询分数表
     查询分数表 jp
 """,
     ),
 )
 
+alc_cutoff_history = Alconna(
+    ["cutoff history", "lsycx", "历史预测线", "ycx ls"],
+    Args["tier", int]["eventId;?", int][
+        "serverName;?",
+        ServerNameFull,
+    ],
+    meta=CommandMeta(
+        compact=TSUGU_COMPACT,
+        description="历史同类活动档线数据",
+        # example="lsycx 1000\nlsycx 1000 177 jp",
+        example='''
+功能介绍:
+    查询 指定档位的预测线 与 [(最近的4期)(活动类型相同的)活动的]档线数据
+必选参数:
+    "20“ / "30" / "50" ...(档位数字) : 用于指定档位
+可选参数:
+    活动ID(数字) : 用于指定活动ID, 默认为当前活动
+    "cn" / "jp" / "en" / "tw" : 用于指定服务器, 默认为你的默认服务器
+使用例:
+    lsycx 1000
+    lsycx 1000 177 : 1000是档位, 177是活动ID
+    lsycx 1000 jp
+    lsycx 1000 177 jp
+特别提醒:
+    由于 bestdori 限制, 本功能暂不支持 10 档位的历史数据
+'''
+    ),
+)
+
 alc_cutoff_all = Alconna(
-    ["ycxall", "ycx all"],
+    ["cutoff all", "ycxall", "ycx all"],
     Args["eventId;?", int]["serverName;?", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -344,21 +321,19 @@ alc_cutoff_all = Alconna(
 可选参数:
     "cn" / "jp" / "en" / "tw" : 用于指定服务器, 默认为你的默认服务器
 使用例:
-    ycxall 
-    ycxall 177 
-    ycxall 177 jp 
+    ycxall
+    ycxall 177
+    ycxall 177 jp
 '''
     ),
 )
 
-alc_cutoff_detail = Alconna(
-    ["ycx", "预测线"],
+alc_cutoff = Alconna(
+    ["cutoff", "ycx", "预测线"],
     Args["tier", int]["eventId;?", int]["serverName;?", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="指定档位的预测线",
-#         example="""ycx 1000
-# ycx 1000 177 jp""",
         example='''
 必选参数:
     "20“ / "30" / "50" ...(档位数字) : 用于指定档位
@@ -368,7 +343,7 @@ alc_cutoff_detail = Alconna(
 使用例:
     ycx 1000
     ycx 1000 177 : 1000是档位, 177是活动ID
-    ycx 1000 jp 
+    ycx 1000 jp
     ycx 1000 177 jp
 特别提醒:
     由于 bestdori 限制, 本功能暂不支持 10 档位的数据
@@ -376,8 +351,8 @@ alc_cutoff_detail = Alconna(
     ),
 )
 
-alc_bind_player = Alconna(
-    ["绑定玩家"],
+alc_bind = Alconna(
+    ["bind", "绑定玩家"],
     Args["playerId", int]["serverName;?", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -388,8 +363,8 @@ alc_bind_player = Alconna(
 可选参数:
     "cn" / "jp" / "en" / "tw" : 用于指定服务器, 默认为你的默认服务器
 使用例:
-    绑定玩家 114514 
-    绑定玩家 1919810 jp 
+    绑定玩家 114514
+    绑定玩家 1919810 jp
 关联指令:
     玩家状态 : 查询绑定的游戏账号信息
     解除绑定 : 解绑游戏账号
@@ -400,9 +375,8 @@ alc_bind_player = Alconna(
     ),
 )
 
-
-alc_change_displayed_server_list = Alconna(
-    ["设置默认服务器", "默认服务器"],
+alc_server_default = Alconna(
+    ["server default", "设置默认服务器", "默认服务器"],
     Args["serverList", MultiVar(ServerNameFull)],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -419,8 +393,8 @@ alc_change_displayed_server_list = Alconna(
     ),
 )
 
-alc_change_main_server = Alconna(
-    ["主服务器", "设置主服务器"],
+alc_server_main = Alconna(
+    ["server main", "设置主服务器", "主服务器"],
     Args["serverName", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -438,8 +412,8 @@ alc_change_main_server = Alconna(
     ),
 )
 
-alc_toggle_share_room_number_off = Alconna(
-    ["关闭车牌转发", "关闭个人车牌转发"],
+alc_share_room_off = Alconna(
+    ["share room off", "关闭车牌转发", "关闭个人车牌转发"],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="",
@@ -450,8 +424,8 @@ alc_toggle_share_room_number_off = Alconna(
     ),
 )
 
-alc_toggle_share_room_number_on = Alconna(
-    ["开启车牌转发", "开启个人车牌转发"],
+alc_share_room_on = Alconna(
+    ["share room on", "开启车牌转发", "开启个人车牌转发"],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="",
@@ -463,7 +437,7 @@ alc_toggle_share_room_number_on = Alconna(
 )
 
 alc_player_status = Alconna(
-    ["玩家状态"],
+    ["player status", "玩家状态"],
     Args["accountIndex;?", int]["serverName;?", ServerNameFull],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -485,8 +459,29 @@ alc_player_status = Alconna(
     ),
 )
 
-alc_set_main_account = Alconna(
-    ["主账号", "主账户"],
+alc_player = Alconna(
+    ["player", "查玩家", "查询玩家"],
+    Args["playerId", int][
+        "serverName;?",
+        ServerNameFull,
+    ],
+    meta=CommandMeta(
+        compact=TSUGU_COMPACT,
+        description="根据玩家ID、服务器查询玩家信息",
+        example="""
+必选参数:
+    玩家ID(数字) : 用于指定玩家ID
+可选参数:
+    "cn" / "jp" / "en" / "tw" : 用于指定服务器, 不指定时为你的默认服务器
+使用例:
+    查玩家 1003282233 : 从你的默认服务器查玩家 1003282233
+    查玩家 40474621 jp
+""",
+    ),
+)
+
+alc_account_main = Alconna(
+    ["account main", "主账号", "主账户"],
     Args["accountIndex;?", int],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -509,8 +504,8 @@ alc_set_main_account = Alconna(
     ),
 )
 
-alc_unbind_player = Alconna(
-    ["解除绑定"],
+alc_unbind = Alconna(
+    ["unbind", "解除绑定"],
     Args["index;?", int],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -526,8 +521,8 @@ alc_unbind_player = Alconna(
     ),
 )
 
-alc_query_room_number = Alconna(
-    ["ycm", "车来", "有车吗"],
+alc_room = Alconna(
+    ["room", "ycm", "车来", "有车吗"],
     Args["_;?", AllParam],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
@@ -539,14 +534,14 @@ alc_query_room_number = Alconna(
     ),
 )
 
-alc_26 = Alconna(
-    ["上传车牌"],
+alc_room_upload = Alconna(
+    ["room upload", "上传车牌"],
     Args["roomNumber", str],
     meta=CommandMeta(
         description="自动检测车牌并上传",
         example="""
 必选参数:
-    车牌号+描述(字符串) 
+    车牌号+描述(字符串)
 使用例:
     上传车牌 123456 大e3q1
     123456 大e3q1

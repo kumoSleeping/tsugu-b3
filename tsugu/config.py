@@ -2,7 +2,7 @@ import os
 import json
 from dotenv import dotenv_values
 from tsugu_api_core import settings
-
+from typing import Dict, Optional
 
 def load_config():
     kv = dotenv_values(".env")
@@ -33,7 +33,7 @@ def load_config():
     return result
 
 
-def apply_config(config: dict):
+def apply_config(config: Dict[str, Optional[str]]):
     for k, v in config.items():
         k = k.lower().removeprefix("tsugu_")
         if hasattr(settings, k):
