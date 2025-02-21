@@ -622,10 +622,12 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     # 最后处理没有匹配的命令给出帮助信息
     for command in command_manager.get_commands():
         if (res := command.parse(message)).head_matched and not command.parse(message).matched:
-            if message.endswith(" -h"):
-                return command_manager.command_help(res.source.name).replace("\n使用示例:\n", "", 1).strip()
+            # if message.endswith(" -h"):
+            #     cmd_full: str = command_manager.command_help(res.source.name)
+            #     foo = "● "+cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
+            #     return foo
             # 如果命令头匹配了, 但是命令没有匹配, 返回 help 信息
             cmd_full: str = command_manager.command_help(res.source.name)
             # foo: str = command_manager.command_help(res.source.name).split("\n", 2)[1] +'\n'+ command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
-            foo = "● "+cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
-            return f"{foo} \n"
+            foo = cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
+            return foo
