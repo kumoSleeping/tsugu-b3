@@ -625,6 +625,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             if message.endswith(" -h"):
                 return command_manager.command_help(res.source.name).replace("\n使用示例:\n", "", 1).strip()
             # 如果命令头匹配了, 但是命令没有匹配, 返回 help 信息
-            print(command_manager.command_help(res.source.name))
-            foo: str = command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
+            cmd_full: str = command_manager.command_help(res.source.name)
+            # foo: str = command_manager.command_help(res.source.name).split("\n", 2)[1] +'\n'+ command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
+            foo = "● "+cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
             return f"{foo} \n"
