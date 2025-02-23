@@ -268,6 +268,30 @@ alc_chart = Alconna(
     ),
 )
 
+# alc_chart = Alconna(
+#     ["chart", "查谱面", "查铺面"],
+#     Args["songId?", int][
+#         "difficultyText",
+#         ("easy", "ez", "normal", "nm", "hard", "hd", "expert", "ex", "special", "sp"),
+#         "ex",
+#     ]["word?", AllParam],
+#     meta=CommandMeta(
+#         compact=TSUGU_COMPACT,
+#         description="根据曲目ID与难度查询铺面信息",
+#         example="""
+# ► 必选参数:
+#     曲目ID(数字) : 用于指定曲目ID
+# ► 可选参数:
+#     "ez" / "easy" / "nm" ... : 用于指定难度, 默认为ex
+# ★ 使用例:
+#     查谱面 1
+#     查谱面 128 special
+# 𓄲 关联指令:
+#     查曲 : 使用"查曲"命令获取曲目ID
+# """,
+#     ),
+# )
+
 alc_scores = Alconna(
     ["scores", "查询分数表", "查分数表", "查询分数榜", "查分数榜"],
     Args["serverName;?", ServerNameFull],
@@ -446,11 +470,16 @@ alc_player_status = Alconna(
         compact=TSUGU_COMPACT,
         description="查询自己的玩家状态",
         example="""
-► 可选参数:
-    主账号顺序(数字) : 用于指定账号
+► 使用绑定顺序查询:
+    ► 可选参数:
+        账号顺序(数字) : 用于指定账号
+► 使用服务器查询:
+    ► 可选参数:
+        "cn" / "jp" / "en" / "tw" : 用于指定服务器, 只会给出找到的第一个账号
 ★ 使用例:
     玩家状态 : 返回默认账号的玩家状态(默认账号由 "主账号" 指令设定)
     玩家状态 2 : 返回账号2的玩家状态
+    玩家状态 jp : 查找第一个账号在日服的玩家状态
 𓄲 关联指令:
     主账号 : 设定默认账号
     绑定玩家 : 绑定游戏账号

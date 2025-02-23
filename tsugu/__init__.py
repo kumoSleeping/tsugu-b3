@@ -11,7 +11,7 @@ from arclet.alconna import output_manager, command_manager
 
 from .alc_cmd import *
 from .config import load_config, apply_config
-from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG, SERVER_TO_INDEX
+from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG, SERVER_TO_INDEX, INDEX_TO_SERVER
 
 
 config = load_config()
@@ -247,6 +247,18 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             song_id=res.songId,
             difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],
         )
+        
+    # if (res := alc_chart.parse(message)).matched:
+    #     user = await get_user(user_id, platform)
+    #     if res.songId:
+    #         return await tsugu_api_async.song_chart(
+    #             displayed_server_list=user.displayed_server_list,
+    #             song_id=res.songId,
+    #             difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],
+    #         )
+    #     elif res.word:
+    #         res_fuzzy_search = await tsugu_api_async.fuzzy_search(text=" ".join(res.word))
+    #         print(res_fuzzy_search)
 
     if (res := alc_scores.parse(message)).matched:
         user = await get_user(user_id, platform)
