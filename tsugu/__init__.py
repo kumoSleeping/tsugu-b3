@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 
 from typing import Awaitable, List, Union, Dict, Optional
-from tsugu_api_core._typing import _ServerId, _UserPlayerInList
+from tsugu_api_core._typing import ServerId, _UserPlayerInList
 from loguru import logger
 from arclet.alconna import output_manager, command_manager
 
@@ -70,8 +70,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     class User:
         user_id: str
         platform: str
-        main_server: _ServerId
-        displayed_server_list: List[_ServerId]
+        main_server: ServerId
+        displayed_server_list: List[ServerId]
         share_room_number: bool
         user_player_index: int
         user_player_list: List[_UserPlayerInList]
@@ -108,28 +108,28 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 raise e
             
     class HandlerUtils:
-        def server_names_2_server_ids(server_name: List[str]) -> List[_ServerId]:
+        def server_names_2_server_ids(server_name: List[str]) -> List[ServerId]:
             """
             服务器名(多)转服务器ID(多)
             """
             return [SERVER_TO_INDEX[code] for code in server_name] #type: ignore
 
 
-        def server_name_2_server_id(server_name: str) -> _ServerId:
+        def server_name_2_server_id(server_name: str) -> ServerId:
             """
             服务器名(1)转服务器ID(1)
             """
             return SERVER_TO_INDEX[server_name] if server_name in SERVER_TO_INDEX else None #type: ignore
 
 
-        # def server_ids_2_server_names(index: List[_ServerId]) -> List[str]:
+        # def server_ids_2_server_names(index: List[ServerId]) -> List[str]:
         #     """
         #     服务器ID(多)转服务器名(多)
         #     """
         #     return [INDEX_TO_SERVER[code] for code in index]
 
 
-        def server_id_2_server_name(index: _ServerId) -> str:
+        def server_id_2_server_name(index: ServerId) -> str:
             """
             服务器ID(1)转服务器名(1)
             """

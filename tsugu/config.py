@@ -1,7 +1,7 @@
 import os
 import json
 from dotenv import dotenv_values
-from tsugu_api_core import settings
+from tsugu_api_core._settings import settings
 from typing import Dict, Optional
 
 def load_config():

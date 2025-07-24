@@ -12,7 +12,7 @@ user_data.db
 dist/
 build/
 
-./test.py
+test.py
 
 
 # Byte-compiled / optimized / DLL files
