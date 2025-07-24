@@ -4,18 +4,22 @@
 <div align="center">
 
 
-<h1 align="center"> Tsugu B3 </h1>
+<h1 align="center"> Tsugu Beta3 </h1>
 
 
 <div align="center">
 
 </div>
 
-✨<img src="./logo.jpg" width="30" width="30" height="30" alt="tsugu"/>✨
+✨<img src="./logo.jpg" width="100" width="30" height="30" alt="tsugu"/>✨
 
 
 
-_✨ User (Natural language) -> ^^^^^  -> [Tsugu BanG Dream Bot](https://github.com/Yamamoto-2/tsugu-bangdream-bot?tab=readme-ov-file)  ✨_
+
+_⚡️ Python 编写的 [Tsugu](https://github.com/Yamamoto-2/tsugu-bangdream-bot?tab=readme-ov-file) 前端 ----- 第三次迭代的设计产物。⚡️_
+
+
+
 </div>
 
 <p align="center">
@@ -33,15 +37,16 @@ _✨ User (Natural language) -> ^^^^^  -> [Tsugu BanG Dream Bot](https://github.
 
 ---
 
-## 📦 Install
+## 📦 Install & Cli-Example
 
 ```shell
 pip install tsugu
+python -m tsugu -h
+python -m tsugu "查卡 686"
 ```
 
-> API powered by  <a href="https://github.com/WindowsSov8forUs/tsugu-api-python?tab=readme-ov-file">tsugu-api-python</a>
-
-> Command matching provided by <a href="https://github.com/ArcletProject/Alconna">Alconna</a>
+API powered by  <a href="https://github.com/WindowsSov8forUs/tsugu-api-python?tab=readme-ov-file">tsugu-api-python</a>    
+Command matching provided by <a href="https://github.com/ArcletProject/Alconna">Alconna</a>    
 
 ***
 
@@ -49,8 +54,8 @@ pip install tsugu
 | 项目 | 说明 |
 | --- | --- |
 | [Tsugu QQ 官方机器人](https://github.com/kumoSleeping/tsugu-qq-open-platform-bot) | 主力项目 |
-| [TBBP](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 无人维护 NoneBot 用户请使用 [NPTBB](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
-|[LTP](https://github.com/kumoSleeping/lgr-tsugu-py) | 无人维护 无法使用 |
+| [TBBP](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 已无人维护 NoneBot 用户请使用 [NPTBB](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
+|[lgr-tsugu-py](https://github.com/kumoSleeping/lgr-tsugu-py) | 已无人维护 无法使用 |
 
 
 ## 📜 Feat
@@ -74,7 +79,14 @@ pip install tsugu
 - 为了适应官方 BOT 的特性，本包提供了隐式一些非通用方法。
   - 当解除绑定用户数据库返回特定值时会被认定为安全模式，触发直接解除绑定操作。
 
+## 🔧 Development
 
+```shell
+pip install -r req
+pip install PIL
+```
+
+---
 
 ## 📚 Async & Higher-Order Function
 `cmd_generator` 是一个异步方法，用于直接处理用户输入的自然语言并处理，调用传入的 `send_func` 发送结果
@@ -100,27 +112,7 @@ asyncio.run(cmd_generator(message='查卡 -h', user_id='114514', platform='sator
 
 ## ✏️ Config
 
->配置方式
-
-- 通过环境变量
-  linux & macos
-  ```zsh
-  export TSUGU_COMPACT=false
-  ...
-  ```
-  windows
-  ```bat
-  set TSUGU_COMPACT=false
-  ...
-  ```
-
-- 通过 `.env` 文件
-  ```shell
-  TSUGU_COMPACT=false
-  ...
-  ```
-
-> 可配置项
+通过 **环境变量** 或通过项目下 **`.env`** 文件配置。
 
 ```zsh
 # 命令头后是否必须跟上完整的空格才能匹配，例如 `查卡947` 与 `查卡 947` 。（默认值：false）
@@ -152,13 +144,3 @@ TSUGU_COMPRESS=true
 ```
 
 
-
-## 🔧 开发相关
-
-> 安装依赖
-> 
-```shell
-pip install -r req
-```
-
----
