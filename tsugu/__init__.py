@@ -64,7 +64,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     async def _send(message: Union[str, List[Dict[str, str]]]):
         await send_func(message)
     
-    logger.info(f"UserId: {user_id} Platform: {platform} Message: {message}")
+    logger.debug(f"UserId: {user_id} Platform: {platform} Message: {message}")
     
     @dataclass
     class User:
@@ -97,7 +97,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     user_player_index=user_data.get("userPlayerIndex"),
                     user_player_list=user_data.get("userPlayerList"),
                 )
-                logger.info(f"User: {user}")
+                logger.debug(f"User: {user}")
                 return user
             except TimeoutError:
                 await asyncio.sleep(0.2)
@@ -158,7 +158,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             )
             if bind_record.strip() == "":
                 return "error: 暂无记录，请先绑定"
-            logger.info(f"bind_record: \n{bind_record}")
+            logger.debug(f"bind_record: \n{bind_record}")
             return bind_record
 
     if (res := alc_5v5.parse(message)).matched:
@@ -320,9 +320,9 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         
         for i in range(7):
-            logger.info(f"开始等待绑定验证, 第{i}次")
+            logger.debug(f"开始等待绑定验证, 第{i}次")
             await asyncio.sleep(20)
-            logger.info(f"时间到, 开始验证绑定")
+            logger.debug(f"时间到, 开始验证绑定")
             try:
                 await tsugu_api_async.bind_player_verification(
                     user_id=user_id,
@@ -333,18 +333,18 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 )
                 user_new = await get_user(user_id, platform)
                 bind_record = HandlerUtils.get_user_account_list_msg(user=user_new)
-                logger.success(f"绑定成功, 绑定列表: {bind_record}")
+                logger.debug(f"绑定成功, 绑定列表: {bind_record}")
                 return f"""绑定成功, 现在可以使用 "玩家状态" 命令查看绑定的玩家状态\n绑定列表: {bind_record}"""
             except Exception as e:
                 # 如果最后一次
                 if i == 6:
-                    logger.error(f"绑定超时, {e}")
+                    logger.debug(f"绑定超时, {e}")
                     return f"解除绑定超时, {e}\n用户未及时修改游戏信息或Bestdori服务器暂时失效"
                 if "都与验证码不匹配" in str(e):
-                    logger.warning(f"验证码不匹配, 重试")
+                    logger.debug(f"验证码不匹配, 重试")
                     continue
                 # 其他错误
-                logger.error(f'出现意外错误, {e}')
+                logger.debug(f'出现意外错误, {e}')
                 return f"出现意外错误, {e}"
 
     if (res := alc_server_default.parse(message)).matched:
@@ -484,7 +484,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         # 私有数据库API的解绑流程
         if r.get("extra") == "safe_mode":
-            logger.warning(f"启用 tsugu-3b safe_mode 解绑流程")
+            logger.debug(f"启用 tsugu-3b safe_mode 解绑流程")
             await tsugu_api_async.bind_player_verification(
                 user_id=user_id,
                 platform=platform,
@@ -499,9 +499,9 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知"""
         )
         for i in range(7):
-            logger.info(f"开始等待解绑验证, 第{i}次")
+            logger.debug(f"开始等待解绑验证, 第{i}次")
             await asyncio.sleep(20)
-            logger.info(f"时间到, 开始验证解绑")
+            logger.debug(f"时间到, 开始验证解绑")
             try:
                 await tsugu_api_async.bind_player_verification(
                     user_id=user_id,
@@ -510,16 +510,16 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     player_id=user.user_player_list[res.index - 1].get("playerId"),
                     binding_action="unbind",
                 )
-                logger.success(f"解除绑定成功")
+                logger.debug(f"解除绑定成功")
                 return f"解除绑定成功"
             except Exception as e:
                 if i == 6:
-                    logger.error(f"解除绑定超时, {e}")
+                    logger.debug(f"解除绑定超时, {e}")
                     return f"解除绑定超时, 用户未及时修改游戏信息或Bestdori服务器暂时失效"
                 if "都与验证码不匹配" in str(e):
-                    logger.warning(f"验证码不匹配, 重试")
+                    logger.debug(f"验证码不匹配, 重试")
                     continue
-                logger.error(f'出现意外错误, {e}')
+                logger.debug(f'出现意外错误, {e}')
                 return f"出现意外错误, {e}"
 
     if (res := alc_room.parse(message)).matched:
@@ -619,7 +619,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     source=config["bandori_station_name"],
                     token=config["bandori_station_token"],
                 )
-                logger.success(f"上传车牌成功: {message_for_car}")
+                logger.debug(f"上传车牌成功: {message_for_car}")
                 return "上传车牌成功"
 
     if (res := alc_help.parse(message)).matched:
@@ -628,7 +628,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         else:
             # 对应下方的最后处理没有匹配的命令给出帮助信息
             message = f"{res.cmd[0]} -h" # 模拟用户输入help命令
-            logger.warning(f"已更改用户输入: {message}")
+            logger.debug(f"已更改用户输入: {message}")
 
 
     # 最后处理没有匹配的命令给出帮助信息

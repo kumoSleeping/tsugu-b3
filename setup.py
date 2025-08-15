@@ -5,7 +5,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='tsugu',
-    version='6.2.0',
+    version='6.2.1',
     author='kumoSleeping',
     author_email='zjr2992@outlook.com',
     license="MIT",
@@ -27,5 +27,10 @@ setup(
         ],
     python_requires='>=3.8',
     include_package_data=False,
+    entry_points={
+        'console_scripts': [
+            'tsugu=tsugu.__main__:main',
+        ],
+    },
 
 )
