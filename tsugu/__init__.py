@@ -55,7 +55,7 @@ async def cmd_generator(
             # 使得 _handler 函数直接 return 与 send 都可以发送消息
             await send_func(result)
     except Exception as e:
-        await send_func("出现错误, 请联系管理员")
+        await send_func("内部错误")
         raise e
     
 

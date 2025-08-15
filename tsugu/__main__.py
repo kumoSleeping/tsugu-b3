@@ -57,12 +57,45 @@ def main():
         parser.add_argument("-u", "--user_id", type=str, default="114514", help="用户ID，默认114514")
         parser.add_argument("-p", "--platform", type=str, default="chronocat", help="平台，默认chronocat")
         parser.add_argument("-d", "--debug", action="store_true", help="启用调试模式")
-        
+        parser.add_argument("-e", "--env", action="store_true", help="输出可选的环境变量配置")
         args = parser.parse_args()
         
         # 根据参数设置日志等级
         log_level = "DEBUG" if args.debug else "INFO"
         init_log(log_level)
+        
+        # 如果请求输出环境变量配置
+        if args.env:
+            logger.info("""可选的环境变量:
+
+# 命令头后是否必须跟上完整的空格才能匹配，例如 `查卡947` 与 `查卡 947` 。（默认值：false）
+TSUGU_COMPACT=false 
+
+# 设置请求超时时间（默认值：120秒）
+TSUGU_TIMEOUT=120
+
+# 设置代理地址（默认值：空字符串）
+TSUGU_PROXY=''
+
+# 设置后端地址（默认值：http://tsugubot.com:8080）
+TSUGU_BACKEND_URL=http://tsugubot.com:8080
+
+# 设置是否使用后端代理（默认值：true）
+TSUGU_BACKEND_PROXY=true
+
+# 设置用户数据后端地址（默认值：http://tsugubot.com:8080）
+TSUGU_USERDATA_BACKEND_URL=http://tsugubot.com:8080
+
+# 设置是否使用用户数据后端代理（默认值：true）
+TSUGU_USERDATA_BACKEND_PROXY=true
+
+# 设置是否使用简易背景（默认值：true）
+TSUGU_USE_EASY_BG=true
+
+# 设置是否压缩返回数据（默认值：true）
+TSUGU_COMPRESS=true
+""")
+            return
         
         # 将所有位置参数合并为一个字符串
         message = ' '.join(args.message) if args.message else ""
@@ -82,7 +115,7 @@ def main():
         logger.info("程序已终止")
         sys.exit(0)
     except Exception as e:
-        logger.error(f"发生错误: {e}")
+        logger.error(f"内部错误: {e}")
 
 if __name__ == "__main__":
     main() 
