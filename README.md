@@ -41,8 +41,8 @@ _⚡️ Python 编写的 [Tsugu](https://github.com/Yamamoto-2/tsugu-bangdream-b
 
 ```shell
 pip install tsugu
-python -m tsugu -h
-python -m tsugu "查卡 686"
+tsugu -h
+tsugu 查卡 686
 ```
 
 API powered by  <a href="https://github.com/WindowsSov8forUs/tsugu-api-python?tab=readme-ov-file">tsugu-api-python</a>    
