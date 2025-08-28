@@ -9,9 +9,22 @@ from arclet.alconna import (
 )
 
 from .const import ServerNameFull
+from nepattern import BasePattern
 
 
 TSUGU_COMPACT: bool = os.environ.get("TSUGU_COMPACT", "true") == "true"
+
+class AllParamText(BasePattern):
+    def __init__(self):
+        super().__init__(origin=str, alias="AllParamText")
+    
+    def match(self, input_):
+        if hasattr(input_, 'text'):  # 如果是 Text 对象
+            return str(input_.text)
+        return str(input_)
+
+AllParamText = AllParamText()
+
 
 if not TSUGU_COMPACT:
     logger.warning("TSUGU_COMPACT is off")
@@ -19,7 +32,7 @@ if not TSUGU_COMPACT:
 
 alc_help = Alconna(
     ["help"],
-    Args["cmd;?", AllParam],
+    Args["cmd;?", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="",
@@ -67,7 +80,7 @@ alc_pull = Alconna(
 
 alc_char = Alconna(
     ["char", "查角色"],
-    Args["word", AllParam],
+    Args["word", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据角色名、乐队、昵称等查询角色信息",
@@ -91,7 +104,7 @@ alc_char = Alconna(
 
 alc_event = Alconna(
     ["event", "查活动"],
-    Args["word", AllParam],
+    Args["word", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据活动名、乐队、活动ID等查询活动信息",
@@ -158,7 +171,7 @@ alc_card_art = Alconna(
 
 alc_card = Alconna(
     ["card", "查卡"],
-    Args["word", AllParam],
+    Args["word", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据卡面ID、角色名、乐队、昵称等查询卡面信息",
@@ -193,7 +206,7 @@ alc_card = Alconna(
 
 alc_song_random = Alconna(
     ["song random", "随机曲"],
-    Args["word;?", AllParam],
+    Args["word;?", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据关键词或曲目ID随机曲目信息",
@@ -217,7 +230,7 @@ alc_song_random = Alconna(
 
 alc_song = Alconna(
     ["song", "查曲"],
-    Args["word", AllParam],
+    Args["word", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="根据关键词或曲目ID查询曲目信息",
@@ -274,7 +287,7 @@ alc_chart = Alconna(
 #         "difficultyText",
 #         ("easy", "ez", "normal", "nm", "hard", "hd", "expert", "ex", "special", "sp"),
 #         "ex",
-#     ]["word?", AllParam],
+#     ]["word?", AllParamText],
 #     meta=CommandMeta(
 #         compact=TSUGU_COMPACT,
 #         description="根据曲目ID与难度查询铺面信息",
@@ -555,7 +568,7 @@ alc_unbind = Alconna(
 
 alc_room = Alconna(
     ["room", "ycm", "车来", "有车吗"],
-    Args["_;?", AllParam],
+    Args["_;?", AllParamText],
     meta=CommandMeta(
         compact=TSUGU_COMPACT,
         description="获取车站信息",

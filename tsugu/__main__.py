@@ -1,6 +1,6 @@
 import argparse
 import asyncio
-from . import cmd_generator
+from .__init__ import cmd_generator
 import base64
 import sys
 from loguru import logger

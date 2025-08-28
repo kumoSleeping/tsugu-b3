@@ -643,3 +643,6 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             # foo: str = command_manager.command_help(res.source.name).split("\n", 2)[1] +'\n'+ command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
             foo = cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
             return foo
+
+
+__all__ = ["cmd_generator"]
