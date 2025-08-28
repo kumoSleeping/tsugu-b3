@@ -5,7 +5,7 @@ with open('README.md', 'r') as readme:
 
 setup(
     name='tsugu',
-    version='6.3.1',
+    version='6.3.2',
     author='kumoSleeping',
     author_email='zjr2992@outlook.com',
     license="MIT",
@@ -22,7 +22,7 @@ setup(
     install_requires=[
             "loguru",
             "python-dotenv",
-            "tsugu-api-python[httpx]>=1.5.9",
+            "tsugu-api-python[httpx]>=1.5.10",
             "arclet-alconna<2.0.0a1",
         ],
     python_requires='>=3.8',
