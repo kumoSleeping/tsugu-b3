@@ -199,19 +199,19 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     if (res := alc_char.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_character(
-            displayed_server_list=user.displayed_server_list, text=" ".join(res.word)
+            displayed_server_list=user.displayed_server_list, text=str(" ".join(res.word))
         )
 
     if (res := alc_event.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_event(
-            displayed_server_list=user.displayed_server_list, text=" ".join(res.word)
+            displayed_server_list=user.displayed_server_list, text=str(" ".join(res.word))
         )
 
     if (res := alc_card.parse(message)).matched and message != "查卡面":
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_card(
-            displayed_server_list=user.displayed_server_list, text=" ".join(res.word)
+            displayed_server_list=user.displayed_server_list, text=str(" ".join(res.word))
         )
 
     if (res := alc_player.parse(message)).matched:
@@ -231,13 +231,13 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         user = await get_user(user_id, platform)
         text = " ".join(res.word) if res.word else None
         return await tsugu_api_async.song_random(
-            main_server=user.main_server, text=text
+            main_server=user.main_server, text=str(text)
         )
 
     if (res := alc_song.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_song(
-            displayed_server_list=user.displayed_server_list, text=" ".join(res.word)
+            displayed_server_list=user.displayed_server_list, text=str(" ".join(res.word))
         )
 
     if (res := alc_chart.parse(message)).matched:
@@ -247,18 +247,6 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             song_id=res.songId,
             difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],
         )
-        
-    # if (res := alc_chart.parse(message)).matched:
-    #     user = await get_user(user_id, platform)
-    #     if res.songId:
-    #         return await tsugu_api_async.song_chart(
-    #             displayed_server_list=user.displayed_server_list,
-    #             song_id=res.songId,
-    #             difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],
-    #         )
-    #     elif res.word:
-    #         res_fuzzy_search = await tsugu_api_async.fuzzy_search(text=" ".join(res.word))
-    #         print(res_fuzzy_search)
 
     if (res := alc_scores.parse(message)).matched:
         user = await get_user(user_id, platform)
