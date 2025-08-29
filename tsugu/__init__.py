@@ -3,25 +3,23 @@ import asyncio
 import tsugu_api_async
 from dataclasses import dataclass
 
-
-from typing import Awaitable, List, Union, Dict, Optional
+from typing import Awaitable, List, Union, Dict, Optional, Callable, Any
 from tsugu_api_core._typing import ServerId, _UserPlayerInList
 from loguru import logger
 from arclet.alconna import output_manager, command_manager
 
 from .alc_cmd import *
-from .config import load_config, apply_config
+from .config import load_config, apply_config_to_settings
 from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG, SERVER_TO_INDEX, INDEX_TO_SERVER
 
 
-config = load_config()
-apply_config(config)
+# 加载配置并应用到 settings
+# 优先级：tsugu_api_core 默认值 < 程序默认值 < 用户配置
+config: Dict[str, Any] = load_config()
+apply_config_to_settings(config)
+
 
 output_manager.set_action(lambda *_: None)  # 禁用 alc 自带输出
-
-
-async def async_print(*args, **kwargs):  # 默认 send 输出函数
-    print(*args, **kwargs)
 
 
 async def cmd_generator(
@@ -29,8 +27,8 @@ async def cmd_generator(
     message: str,
     user_id: str,
     platform: str = "chronocat",
-    send_func: Optional[Awaitable] = async_print,
-):
+    send_func: Optional[Callable[..., Awaitable[Any]]] = None,
+) -> None:
     """
     ## 命令生成器
     生成命令并返回结果
@@ -39,30 +37,52 @@ async def cmd_generator(
         message (str): 用户信息
         user_id (str): 用户ID
         platform (str, optional): 平台, 当用户ID为真实QQ号时, 平台可以为 chronocat == red == onebot. Defaults to "chronocat".
-        send_func (Optional[Awaitable], optional): 发送消息的函数. Defaults to None.
+        send_func (Optional[Callable[..., Awaitable[Any]]]): 发送消息的函数. Defaults to None (控制台打印).
 
-    send_func 需处理的消息格式为 str 或者 List[Dict[str, str]]
+    send_func 需处理的消息格式为 List[Dict[str, str]]
+    内部统一使用 send 函数，支持 str 和 List[Dict[str, str]] 两种格式
+    当发送 str 时会自动转换为 [{"type": "string", "string": message}] 格式
 
     """
+    
+    async def send(message: Union[str, List[Dict[str, str]]]) -> None:
+        """
+        统一的发送函数
+        - 支持发送 str 和 List[Dict[str, str]] 两种格式
+        - 当发送 str 时，会转换为 List[Dict[str, str]] 格式
+        - 如果没有提供 send_func，则默认打印到控制台
+        """
+        # 统一转换为列表格式
+        if isinstance(message, str):
+            formatted_message = [{"type": "string", "string": message}]
+        else:
+            formatted_message = message
+        
+        # 如果没有提供 send_func，默认打印
+        if send_func is None:
+            for item in formatted_message:
+                if item.get("type") == "string":
+                    print(item.get("string", ""))
+        else:
+            await send_func(formatted_message)
+    
+    # 使用统一的 send 函数
     try:
         result = await _handler(
             message=message,
             user_id=user_id,
             platform=platform,
-            send_func=send_func,
+            send=send,
         )
         if result:
-            # 使得 _handler 函数直接 return 与 send 都可以发送消息
-            await send_func(result)
+            # 使用统一的 send 函数
+            await send(result)
     except Exception as e:
-        await send_func("内部错误")
+        await send("内部错误")
         raise e
     
 
-async def _handler(message: str, user_id: str, platform: str, send_func: Awaitable):
-
-    async def _send(message: Union[str, List[Dict[str, str]]]):
-        await send_func(message)
+async def _handler(message: str, user_id: str, platform: str, send: Callable[[Union[str, List[Dict[str, str]]]], Awaitable[None]]) -> Any:
     
     logger.debug(f"UserId: {user_id} Platform: {platform} Message: {message}")
     
@@ -76,13 +96,14 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         user_player_index: int
         user_player_list: List[_UserPlayerInList]
         
-    async def get_user(user_id: str, platform: str) -> Optional[User]:
+    async def get_user(user_id: str, platform: str) -> User:
         """
-        多次尝试获取用户数据
+        多次尝试获取用户数据，如果失败则抛出异常
 
         :param user_id:
         :param platform:
         :return:
+        :raises ValueError: 当无法获取用户数据时抛出
         """
         for i in range(3):
             try:
@@ -106,15 +127,19 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             except Exception as e:
                 logger.error(f"Error: {e}")
                 raise e
+        
+        # 如果所有重试都失败，抛出异常
+        raise ValueError("无法获取用户数据，请稍后重试")
             
     class HandlerUtils:
+        @staticmethod
         def server_names_2_server_ids(server_name: List[str]) -> List[ServerId]:
             """
             服务器名(多)转服务器ID(多)
             """
             return [SERVER_TO_INDEX[code] for code in server_name] #type: ignore
 
-
+        @staticmethod
         def server_name_2_server_id(server_name: str) -> ServerId:
             """
             服务器名(1)转服务器ID(1)
@@ -128,19 +153,20 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         #     """
         #     return [INDEX_TO_SERVER[code] for code in index]
 
-
+        @staticmethod
         def server_id_2_server_name(index: ServerId) -> str:
             """
             服务器ID(1)转服务器名(1)
             """
             return INDEX_TO_SERVER[index] if index in INDEX_TO_SERVER else None #type: ignore
 
-        def get_user_account_list_msg(user) -> str:
+        @staticmethod
+        def get_user_account_list_msg(user: User) -> str:
             """
             用于获取绑定的账号的列表信息文字
             """
 
-            def mask_data(game_id: str):
+            def mask_data(game_id: str) -> str:
                 game_id = str(game_id)
                 if len(game_id) < 6:
                     return game_id[:3] + "*" * (len(game_id) - 3)
@@ -177,6 +203,8 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         )
 
     if (res := alc_card_art.parse(message)).matched:
+        if res.cardId is None:
+            return "卡片ID不能为空"
         return await tsugu_api_async.get_card_illustration(card_id=res.cardId)
 
     if (res := alc_cutoff_history.parse(message)).matched:
@@ -187,31 +215,31 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             else user.main_server
         )
         return await tsugu_api_async.cutoff_list_of_recent_event(
-            main_server=server, tier=res.tier, event_id=res.eventId
+            main_server=server, tier=res.tier, event_id=res.eventId  # type: ignore
         )
 
     if (res := alc_gacha.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_gacha(
-            displayed_server_list=user.displayed_server_list, gacha_id=res.gachaId
+            displayed_server_list=user.displayed_server_list, gacha_id=res.gachaId  # type: ignore
         )
 
     if (res := alc_char.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_character(
-            displayed_server_list=user.displayed_server_list, text=str(" ".join(str(word) for word in res.word))
+            displayed_server_list=user.displayed_server_list, text=" ".join(str(word) for word in res.word)  # type: ignore
         )
 
     if (res := alc_event.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_event(
-            displayed_server_list=user.displayed_server_list, text=str(" ".join(str(word) for word in res.word))
+            displayed_server_list=user.displayed_server_list, text=" ".join(str(word) for word in res.word)  # type: ignore
         )
 
     if (res := alc_card.parse(message)).matched and message != "查卡面":
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_card(
-            displayed_server_list=user.displayed_server_list, text=str(" ".join(str(word) for word in res.word))
+            displayed_server_list=user.displayed_server_list, text=" ".join(str(word) for word in res.word)  # type: ignore
         )
 
     if (res := alc_player.parse(message)).matched:
@@ -224,12 +252,12 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         if str(res.playerId).startswith("4") and server == 3:
             return "Bestdori 暂不支持渠道服相关功能"
         return await tsugu_api_async.search_player(
-            player_id=res.playerId, main_server=server
+            player_id=res.playerId, main_server=server  # type: ignore
         )
 
     if (res := alc_song_random.parse(message)).matched:
         user = await get_user(user_id, platform)
-        text = " ".join(str(word) for word in res.word) if res.word else None
+        text = " ".join(str(word) for word in res.word) if res.word else None  # type: ignore
         return await tsugu_api_async.song_random(
             main_server=user.main_server, text=str(text)
         )
@@ -237,15 +265,15 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
     if (res := alc_song.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.search_song(
-            displayed_server_list=user.displayed_server_list, text=str(" ".join(str(word) for word in res.word))
+            displayed_server_list=user.displayed_server_list, text=" ".join(str(word) for word in res.word)  # type: ignore
         )
 
     if (res := alc_chart.parse(message)).matched:
         user = await get_user(user_id, platform)
         return await tsugu_api_async.song_chart(
             displayed_server_list=user.displayed_server_list,
-            song_id=res.songId,
-            difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],
+            song_id=res.songId,  # type: ignore
+            difficulty_id=DIFFICULTY_TEXT_TO_ID[res.difficultyText],  # type: ignore
         )
 
     if (res := alc_scores.parse(message)).matched:
@@ -278,7 +306,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             else user.main_server
         )
         return await tsugu_api_async.cutoff_detail(
-            main_server=server, tier=res.tier, event_id=res.eventId
+            main_server=server, tier=res.tier, event_id=res.eventId  # type: ignore
         )
 
     if (res := alc_bind.parse(message)).matched:
@@ -304,7 +332,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         r = await tsugu_api_async.bind_player_request(
             user_id=user_id, platform=platform
         )
-        await _send(f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知""")
+        await send(f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知""")
 
         
         for i in range(7):
@@ -316,7 +344,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                     user_id=user_id,
                     platform=platform,
                     server=server,
-                    player_id=res.playerId,
+                    player_id=res.playerId,  # type: ignore
                     binding_action="bind",
                 )
                 user_new = await get_user(user_id, platform)
@@ -337,26 +365,26 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
     if (res := alc_server_default.parse(message)).matched:
         user = await get_user(user_id, platform)
-        server_list = HandlerUtils.server_names_2_server_ids(res.serverList)
+        server_list = HandlerUtils.server_names_2_server_ids(res.serverList)  # type: ignore
         update = {"displayedServerList": server_list}
         await tsugu_api_async.change_user_data(
-            platform=platform, user_id=user.user_id, update=update
+            platform=platform, user_id=user.user_id, update=update  # type: ignore
         )
-        return f"默认服务器已设置为 {', '.join(res.serverList)}"
+        return f"默认服务器已设置为 {', '.join(res.serverList)}"  # type: ignore
 
     if (res := alc_server_main.parse(message)).matched:
         user = await get_user(user_id, platform)
-        server = HandlerUtils.server_name_2_server_id(res.serverName)
+        server = HandlerUtils.server_name_2_server_id(res.serverName)  # type: ignore
         r = await tsugu_api_async.change_user_data(
-            platform=platform, user_id=user.user_id, update={"mainServer": server}
+            platform=platform, user_id=user.user_id, update={"mainServer": server}  # type: ignore
         )
-        return f"主服务器已设置为 {res.serverName}"
+        return f"主服务器已设置为 {res.serverName}"  # type: ignore
 
     if (res := alc_share_room_off.parse(message)).matched:
         user = await get_user(user_id, platform)
         update = {"shareRoomNumber": False}
         await tsugu_api_async.change_user_data(
-            platform=platform, user_id=user.user_id, update=update
+            platform=platform, user_id=user.user_id, update=update  # type: ignore
         )
         return "关闭车牌转发成功"
 
@@ -364,7 +392,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
         user = await get_user(user_id, platform)
         update = {"shareRoomNumber": True}
         await tsugu_api_async.change_user_data(
-            platform=platform, user_id=user.user_id, update=update
+            platform=platform, user_id=user.user_id, update=update  # type: ignore
         )
         return "开启车牌转发成功"
 
@@ -381,9 +409,9 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             if user.user_player_index + 1 > len(user.user_player_list):
                 update = {"userPlayerIndex": 0}
                 await tsugu_api_async.change_user_data(
-                    platform=platform, user_id=user.user_id, update=update
+                    platform=platform, user_id=user.user_id, update=update  # type: ignore
                 )
-                await _send(f"""主账号异常, 自动修正成功, 将生成玩家状态（1）""")
+                await send(f"""主账号异常, 自动修正成功, 将生成玩家状态（1）""")
             game_id_msg = user.user_player_list[user_player_index]
             return await tsugu_api_async.search_player(
                 player_id=int(game_id_msg.get("playerId")),
@@ -394,9 +422,9 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             """
             指定服务器名, 返回该服务器的玩家状态(如果存在)（只返回第一个）
             """
-            server_id = HandlerUtils.server_name_2_server_id(res.serverName)
+            server_id = HandlerUtils.server_name_2_server_id(res.serverName)  # type: ignore
             if server_id is None:
-                return "未找到服务器 " + res.serverName
+                return "未找到服务器 " + res.serverName  # type: ignore
 
             for i, x in enumerate(user.user_player_list):
                 if x.get("server") == server_id:
@@ -411,10 +439,10 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             """
             指定账号序号, 返回该账号的玩家状态
             """
-            if res.accountIndex > len(user.user_player_list) or res.accountIndex < 1:
+            if res.accountIndex > len(user.user_player_list) or res.accountIndex < 1:  # type: ignore
                 return f"未找到记录 {res.accountIndex}, 请先绑定"
 
-            game_id_msg = user.user_player_list[res.accountIndex - 1]
+            game_id_msg = user.user_player_list[res.accountIndex - 1]  # type: ignore
             return await tsugu_api_async.search_player(
                 int(game_id_msg.get("playerId")), game_id_msg.get("server")
             )
@@ -443,9 +471,9 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
                 return "未找到记录, 请先绑定账号"
             return f"请选择你要设置为主账号的账号数字: \n{bind_record}\n例如: 主账号 1"
 
-        update = {"userPlayerIndex": res.accountIndex - 1}
-        await tsugu_api_async.change_user_data(platform, user.user_id, update)
-        return f"主账号已设置为账号 {res.accountIndex}"
+        update = {"userPlayerIndex": res.accountIndex - 1}  # type: ignore
+        await tsugu_api_async.change_user_data(platform, user.user_id, update)  # type: ignore
+        return f"主账号已设置为账号 {res.accountIndex}"  # type: ignore
 
     if (res := alc_unbind.parse(message)).matched:
 
@@ -460,7 +488,11 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
 
         user = await get_user(user_id, platform)
 
-        if (not res.index) or len(user.user_player_list) < res.index or res.index < 1:
+        if (
+            not res.index
+            or len(user.user_player_list) < res.index
+            or res.index < 1
+        ):
             bind_record = HandlerUtils.get_user_account_list_msg(user)
             if bind_record == "":
                 return "未找到记录, 请先绑定账号"
@@ -483,7 +515,7 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             return f"解除绑定成功"
 
         # 常规解绑流程
-        await _send(
+        await send(
             f"""请将在2min内将游戏账号的"评论(签名)"或"当前编队的名称"改为\n{r.get('data')['verifyCode']}\nbot验证成功后会发送消息通知"""
         )
         for i in range(7):
@@ -627,10 +659,11 @@ async def _handler(message: str, user_id: str, platform: str, send_func: Awaitab
             #     foo = "● "+cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
             #     return foo
             # 如果命令头匹配了, 但是命令没有匹配, 返回 help 信息
-            cmd_full: str = command_manager.command_help(res.source.name)
-            # foo: str = command_manager.command_help(res.source.name).split("\n", 2)[1] +'\n'+ command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
-            foo = cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
-            return foo
+            cmd_full: Optional[str] = command_manager.command_help(res.source.name)
+            if cmd_full:
+                # foo: str = command_manager.command_help(res.source.name).split("\n", 2)[1] +'\n'+ command_manager.command_help(res.source.name).split("\n", 3)[3].strip()
+                foo = cmd_full.split("\n", 2)[1] +'\n'+ cmd_full.split("\n", 3)[3].strip()
+                return foo
 
 
 __all__ = ["cmd_generator"]

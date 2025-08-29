@@ -9,15 +9,13 @@ from arclet.alconna import (
 )
 
 from .const import ServerNameFull
+from .config import check_config
 from nepattern import BasePattern
 
 
-TSUGU_COMPACT: bool = os.environ.get("TSUGU_COMPACT", "true") == "true"
-
-
-
-if not TSUGU_COMPACT:
-    logger.warning("TSUGU_COMPACT is off")
+# 使用配置检测函数获取 TSUGU_COMPACT 值
+config = check_config()
+TSUGU_COMPACT: bool = config.get("TSUGU_COMPACT", False)
 
 
 alc_help = Alconna(
