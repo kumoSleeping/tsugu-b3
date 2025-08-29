@@ -37,6 +37,18 @@ _⚡️ Python 编写的 [Tsugu](https://github.com/Yamamoto-2/tsugu-bangdream-b
 
 ---
 
+## 📜 Introduction
+
+Tsugu-b3是 [Tsugu](https://github.com/Yamamoto-2/tsugu-bangdream-bot?tab=readme-ov-file) 的第一个非官方前端, 自诞生以来致力于用户友好、开发自由.
+
+自QQ官方机器人推出以来, Tsugu-b3 主要为 Tsugu QQ 官方机器人提供支持, 并稳定运行至今.
+ 
+在未来, Tsugu-b3 依靠高阶函数设计, 也能随时为在各种环境下提供支持。
+
+得益于此设计方式, Tsugu-b3 完全支持命令行下的使用, 为整体前后端的单元测试提供便捷思路.
+
+---
+
 ## 📦 Install & Cli-Example
 
 ```shell
@@ -54,8 +66,8 @@ Command matching provided by <a href="https://github.com/ArcletProject/Alconna">
 | 项目 | 说明 |
 | --- | --- |
 | [Tsugu QQ 官方机器人](https://github.com/kumoSleeping/tsugu-qq-open-platform-bot) | 主力项目 |
+|[lgr-tsugu-py](https://github.com/kumoSleeping/lgr-tsugu-py) | 可以使用 |
 | [TBBP](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 已无人维护 NoneBot 用户请使用 [NPTBB](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
-|[lgr-tsugu-py](https://github.com/kumoSleeping/lgr-tsugu-py) | 已无人维护 无法使用 |
 
 
 ## 📜 Feat
@@ -103,7 +115,6 @@ from loguru import logger
 
 async def _test_send_eg(result):
     if isinstance(result, list): [logger.success(item['string']) for item in result if item["type"] == "string"]
-    if isinstance(result, str): logger.success("\n" + result)
 
 asyncio.run(cmd_generator(message='查卡 -h', user_id='114514', platform='satori',send_func=_test_send_eg))
 
@@ -115,32 +126,7 @@ asyncio.run(cmd_generator(message='查卡 -h', user_id='114514', platform='sator
 通过 **环境变量** 或通过项目下 **`.env`** 文件配置。
 
 ```zsh
-# 命令头后是否必须跟上完整的空格才能匹配，例如 `查卡947` 与 `查卡 947` 。（默认值：false）
-TSUGU_COMPACT=false 
-
-# 设置请求超时时间（默认值：120秒）
-TSUGU_TIMEOUT=120
-
-# 设置代理地址（默认值：空字符串）
-TSUGU_PROXY=''
-
-# 设置后端地址（默认值：http://tsugubot.com:8080）
-TSUGU_BACKEND_URL=http://tsugubot.com:8080
-
-# 设置是否使用后端代理（默认值：true）
-TSUGU_BACKEND_PROXY=true
-
-# 设置用户数据后端地址（默认值：http://tsugubot.com:8080）
-TSUGU_USERDATA_BACKEND_URL=http://tsugubot.com:8080
-
-# 设置是否使用用户数据后端代理（默认值：true）
-TSUGU_USERDATA_BACKEND_PROXY=true
-
-# 设置是否使用简易背景（默认值：true）
-TSUGU_USE_EASY_BG=true
-
-# 设置是否压缩返回数据（默认值：true）
-TSUGU_COMPRESS=true
+tsugu -e
 ```
-
-
+查看可选的环境变量配置
+> 优先级: .env 文件 > 环境变量 > b3 默认 > Tsugu Api Python 默认
