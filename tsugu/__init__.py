@@ -8,7 +8,6 @@ from tsugu_api_core._typing import ServerId, _UserPlayerInList
 from loguru import logger
 from arclet.alconna import output_manager, command_manager
 
-from .alc_cmd import *
 from .config import load_config, apply_config_to_settings
 from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG, SERVER_TO_INDEX, INDEX_TO_SERVER
 
@@ -17,6 +16,8 @@ from .const import DIFFICULTY_TEXT_TO_ID, CAR_CONFIG, SERVER_TO_INDEX, INDEX_TO_
 # 优先级：tsugu_api_core 默认值 < 程序默认值 < 用户配置
 config: Dict[str, Any] = load_config()
 apply_config_to_settings(config)
+
+from .alc_cmd import *
 
 
 output_manager.set_action(lambda *_: None)  # 禁用 alc 自带输出

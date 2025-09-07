@@ -9,13 +9,16 @@ from arclet.alconna import (
 )
 
 from .const import ServerNameFull
-from .config import check_config
+from .config import load_config
 from nepattern import BasePattern
 
 
 # 使用配置检测函数获取 TSUGU_COMPACT 值
-config = check_config()
-TSUGU_COMPACT: bool = config.get("TSUGU_COMPACT", False)
+config = load_config()
+TSUGU_COMPACT: bool = config.get("compact", False)
+if not TSUGU_COMPACT:
+    # 如果 compact 为 False，检查是否设置了 compress（向后兼容）
+    TSUGU_COMPACT = config.get("compress", False)
 
 
 alc_help = Alconna(

@@ -62,12 +62,12 @@ Command matching provided by <a href="https://github.com/ArcletProject/Alconna">
 
 ***
 
-## 🚗 App
-| 项目 | 说明 |
-| --- | --- |
-| [Tsugu QQ 官方机器人](https://github.com/kumoSleeping/tsugu-qq-open-platform-bot) | 主力项目 |
-|[lgr-tsugu-py](https://github.com/kumoSleeping/lgr-tsugu-py) | 可以使用 |
-| [TBBP](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 已无人维护 NoneBot 用户请使用 [NPTBB](https://github.com/WindowsSov8forUs/nonebot-plugin-tsugu-bangdream-bot) |
+## 🛠 Related Projects
+
+- [entari-plugin-tsugu](https://github.com/kumoSleeping/entari-plugin-tsugu) 
+
+- [lgr-tsugu-py](https://github.com/kumoSleeping/lgr-tsugu-py)
+- [tsugu-bangdream-bot-py](https://github.com/zhaomaoniu/tsugu-bangdream-bot-py) | 已无人维护
 
 
 ## 📜 Feat
@@ -95,7 +95,7 @@ Command matching provided by <a href="https://github.com/ArcletProject/Alconna">
 
 ```shell
 pip install -r req
-pip install PIL
+pip install pillow
 ```
 
 ---
